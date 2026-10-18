@@ -3,100 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HAKISS - Trung Tâm Nạp Firmware</title>
+  <title>HAKISS - Nạp Firmware Trực Tuyến</title>
+  <!-- Thư viện ESP Web Tools chính thức -->
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f7f9fa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f8;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      padding: 15px;
+      padding: 16px;
+      box-sizing: border-box;
     }
-    .box {
+    .card {
       background: #ffffff;
-      padding: 28px;
+      padding: 32px 28px;
       border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      max-width: 440px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      max-width: 460px;
       width: 100%;
     }
-    h2 { color: #d9534f; text-align: center; margin-top: 0; }
-    p.sub { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-    label { font-weight: bold; font-size: 14px; display: block; margin-top: 12px; margin-bottom: 6px; }
-    select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    h2 {
+      color: #d9534f;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      text-align: center;
+      color: #666;
       font-size: 14px;
-      background: #fff;
+      margin-top: 0;
+      margin-bottom: 22px;
     }
-    .info-box {
-      background: #fdf2f2;
-      border-left: 4px solid #d9534f;
-      padding: 10px 14px;
-      margin: 18px 0;
-      font-size: 13px;
+    label {
+      font-weight: 600;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 6px;
       color: #333;
     }
-    .btn-container { text-align: center; margin-top: 20px; }
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: #fff;
+      color: #212529;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+    select:focus {
+      outline: none;
+      border-color: #d9534f;
+    }
+    .guide-box {
+      background-color: #fff8f8;
+      border-left: 4px solid #d9534f;
+      padding: 12px 14px;
+      border-radius: 4px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #495057;
+      line-height: 1.5;
+    }
+    .btn-wrap {
+      text-align: center;
+    }
     .flash-btn {
-      background: #d9534f;
-      color: #fff;
+      background-color: #d9534f;
+      color: #ffffff;
       border: none;
       padding: 12px 24px;
       border-radius: 6px;
       font-weight: bold;
-      cursor: pointer;
       font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .flash-btn:hover {
+      background-color: #c9302c;
     }
   </style>
 </head>
 <body>
 
-  <div class="box">
-    <h2>HAKISS Firmware Hub</h2>
-    <p class="sub">Chọn chương trình và phiên bản phù hợp để nạp cho ESP</p>
+  <div class="card">
+    <h2>HAKISS Firmware Flasher</h2>
+    <p class="desc">Chọn đúng dự án và loại board trước khi cắm cáp USB nạp</p>
 
-    <!-- Menu chọn chương trình & phiên bản -->
-    <label for="fwSelect">Chọn chương trình nạp:</label>
-    <select id="fwSelect" onchange="changeFirmware()">
-      <optgroup label="Bên Truyền (ESP32-C3 Super Mini)">
-        <option value="./firmwares/hakiss-sender/v1.0.0/manifest.json">Mạch Truyền - v1.0.0 (Cơ bản)</option>
-        <option value="./firmwares/hakiss-sender/v1.1.0/manifest.json">Mạch Truyền - v1.1.0 (Tối ưu hóa)</option>
+    <!-- Menu chọn Dự án và Phiên bản -->
+    <label for="projectSelector">Dự án & Phiên bản:</label>
+    <select id="projectSelector" onchange="updateManifest()">
+      <!-- Dự án 1: hakiss_farm_system -->
+      <optgroup label="Dự án: hakiss_farm_system">
+        <option value="./firmwares/hakiss_farm_system/v1.0.0/manifest.json">
+          v1.0.0 (ESP32-S3 N16R8)
+        </option>
+        <option value="./firmwares/hakiss_farm_system/v1.1.0/manifest.json">
+          v1.1.0 (ESP32-S3 N16R8)
+        </option>
       </optgroup>
-      <optgroup label="Bên Nhận (ESP32-S3 DevKit C1)">
-        <option value="./firmwares/hakiss-receiver/v1.0.0/manifest.json">Mạch Nhận - v1.0.0 (Chuẩn)</option>
-        <option value="./firmwares/hakiss-receiver/v2.0.0-json/manifest.json">Mạch Nhận - v2.0.0 (Gửi Email JSON)</option>
-      </optgroup>
-      <optgroup label="Dự án khác">
-        <option value="./firmwares/hakiss-farm/v1.0.0/manifest.json">Hakiss Smart Farm (ESP32-S3 N16R8)</option>
+
+      <!-- Dự án 2: hakiss_smoke_system -->
+      <optgroup label="Dự án: hakiss_smoke_system">
+        <option value="./firmwares/hakiss_smoke_system/v1.0.0-receiver/manifest.json">
+          v1.0.0 - Mạch Nhận (ESP32-S3)
+        </option>
+        <option value="./firmwares/hakiss_smoke_system/v1.0.0-sender/manifest.json">
+          v1.0.0 - Mạch Truyền (ESP32-C3)
+        </option>
       </optgroup>
     </select>
 
-    <div class="info-box">
-      <b>Lưu ý:</b> Đảm bảo chọn đúng loại board (C3 hoặc S3) trước khi bấm nạp để tránh lỗi chip[cite: 2, 5].
+    <div class="guide-box">
+      <b>Hướng dẫn:</b>
+      <br>1. Cắm cáp USB nối mạch vào máy tính.
+      <br>2. Bấm nút nạp và chọn đúng cổng COM.
+      <br><i>(Nếu không tự nhận, giữ nút <b>BOOT</b> rồi cắm cáp để vào Download Mode).</i>
     </div>
 
-    <!-- Nút nạp -->
-    <div class="btn-container">
-      <esp-web-install-button id="flasherBtn" manifest="./firmwares/hakiss-sender/v1.0.0/manifest.json">
+    <!-- Nút kích hoạt nạp qua Web Serial -->
+    <div class="btn-wrap">
+      <esp-web-install-button id="flasherButton" manifest="./firmwares/hakiss_farm_system/v1.0.0/manifest.json">
         <button slot="activate" class="flash-btn">KẾT NỐI VÀ NẠP</button>
-        <span slot="unsupported">Trình duyệt không hỗ trợ Web Serial. Hãy dùng Chrome/Edge trên máy tính.</span>
+        <span slot="unsupported">Trình duyệt không hỗ trợ Web Serial API. Vui lòng mở bằng Google Chrome hoặc Microsoft Edge trên máy tính.</span>
       </esp-web-install-button>
     </div>
   </div>
 
   <script>
-    function changeFirmware() {
-      const select = document.getElementById('fwSelect');
-      const btn = document.getElementById('flasherBtn');
-      // Đổi đường dẫn manifest theo mục người dùng chọn
-      btn.setAttribute('manifest', select.value);
+    function updateManifest() {
+      const select = document.getElementById('projectSelector');
+      const flasherBtn = document.getElementById('flasherButton');
+      // Gán đường dẫn manifest tương ứng với lựa chọn
+      flasherBtn.setAttribute('manifest', select.value);
     }
   </script>
 
