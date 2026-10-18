@@ -1,0 +1,20 @@
+[
+  {
+    "groupName": "Dự án: Trang Trại HAKISS",
+    "versions": [
+      {
+        "name": "v1.0.0 (ESP32-S3 N16R8)",
+        "path": "./firmwares/hakiss_farm_system/manifest.json"
+      }
+    ]
+  },
+  {
+    "groupName": "Dự án: Hệ Thống Phát Hiện Khói HAKISS",
+    "versions": [
+      {
+        "name": "v1.0.0 - (ESP32-S3)",
+        "path": "./firmwares/hakiss_smoke_system/manifest.json"
+      }
+    ]
+  }
+]

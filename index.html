@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HAKISS - Nạp Firmware Trực Tuyến</title>
-  <!-- Thư viện ESP Web Tools chính thức -->
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   <style>
     body {
@@ -26,68 +25,25 @@
       max-width: 460px;
       width: 100%;
     }
-    h2 {
-      color: #d9534f;
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 8px;
-    }
-    p.desc {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-top: 0;
-      margin-bottom: 22px;
-    }
-    label {
-      font-weight: 600;
-      font-size: 14px;
-      display: block;
-      margin-bottom: 6px;
-      color: #333;
-    }
+    h2 { color: #d9534f; text-align: center; margin-top: 0; margin-bottom: 8px; }
+    p.desc { text-align: center; color: #666; font-size: 14px; margin-top: 0; margin-bottom: 22px; }
+    label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; color: #333; }
     select {
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid #ced4da;
-      border-radius: 8px;
-      font-size: 14px;
-      background-color: #fff;
-      color: #212529;
-      margin-bottom: 16px;
-      cursor: pointer;
+      width: 100%; padding: 11px 12px; border: 1px solid #ced4da; border-radius: 8px;
+      font-size: 14px; background-color: #fff; color: #212529; margin-bottom: 16px; cursor: pointer;
     }
-    select:focus {
-      outline: none;
-      border-color: #d9534f;
-    }
+    select:focus { outline: none; border-color: #d9534f; }
     .guide-box {
-      background-color: #fff8f8;
-      border-left: 4px solid #d9534f;
-      padding: 12px 14px;
-      border-radius: 4px;
-      margin-bottom: 22px;
-      font-size: 13px;
-      color: #495057;
-      line-height: 1.5;
+      background-color: #fff8f8; border-left: 4px solid #d9534f; padding: 12px 14px;
+      border-radius: 4px; margin-bottom: 22px; font-size: 13px; color: #495057; line-height: 1.5;
     }
-    .btn-wrap {
-      text-align: center;
-    }
+    .btn-wrap { text-align: center; }
     .flash-btn {
-      background-color: #d9534f;
-      color: #ffffff;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background-color 0.2s;
+      background-color: #d9534f; color: #ffffff; border: none; padding: 12px 24px;
+      border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background-color 0.2s;
     }
-    .flash-btn:hover {
-      background-color: #c9302c;
-    }
+    .flash-btn:hover { background-color: #c9302c; }
+    .flash-btn:disabled { background-color: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -96,28 +52,10 @@
     <h2>HAKISS Firmware Flasher</h2>
     <p class="desc">Chọn đúng dự án và loại board trước khi cắm cáp USB nạp</p>
 
-    <!-- Menu chọn Dự án và Phiên bản -->
+    <!-- Menu này ban đầu trống, sẽ được JavaScript tự động điền vào -->
     <label for="projectSelector">Dự án & Phiên bản:</label>
     <select id="projectSelector" onchange="updateManifest()">
-      <!-- Dự án 1: hakiss_farm_system -->
-      <optgroup label="Dự án: hakiss_farm_system">
-        <option value="./firmwares/hakiss_farm_system/v1.0.0/manifest.json">
-          v1.0.0 (ESP32-S3 N16R8)
-        </option>
-        <option value="./firmwares/hakiss_farm_system/v1.1.0/manifest.json">
-          v1.1.0 (ESP32-S3 N16R8)
-        </option>
-      </optgroup>
-
-      <!-- Dự án 2: hakiss_smoke_system -->
-      <optgroup label="Dự án: hakiss_smoke_system">
-        <option value="./firmwares/hakiss_smoke_system/v1.0.0-receiver/manifest.json">
-          v1.0.0 - Mạch Nhận (ESP32-S3)
-        </option>
-        <option value="./firmwares/hakiss_smoke_system/v1.0.0-sender/manifest.json">
-          v1.0.0 - Mạch Truyền (ESP32-C3)
-        </option>
-      </optgroup>
+      <option value="">Đang tải danh sách...</option>
     </select>
 
     <div class="guide-box">
@@ -129,20 +67,65 @@
 
     <!-- Nút kích hoạt nạp qua Web Serial -->
     <div class="btn-wrap">
-      <esp-web-install-button id="flasherButton" manifest="./firmwares/hakiss_farm_system/v1.0.0/manifest.json">
-        <button slot="activate" class="flash-btn">KẾT NỐI VÀ NẠP</button>
+      <esp-web-install-button id="flasherButton" manifest="">
+        <button slot="activate" class="flash-btn" id="activateBtn" disabled>KẾT NỐI VÀ NẠP</button>
         <span slot="unsupported">Trình duyệt không hỗ trợ Web Serial API. Vui lòng mở bằng Google Chrome hoặc Microsoft Edge trên máy tính.</span>
       </esp-web-install-button>
     </div>
   </div>
 
   <script>
+    // Hàm gọi khi thay đổi lựa chọn trong menu
     function updateManifest() {
       const select = document.getElementById('projectSelector');
       const flasherBtn = document.getElementById('flasherButton');
-      // Gán đường dẫn manifest tương ứng với lựa chọn
-      flasherBtn.setAttribute('manifest', select.value);
+      
+      if (select.value) {
+        flasherBtn.setAttribute('manifest', select.value);
+        document.getElementById('activateBtn').disabled = false;
+      } else {
+        flasherBtn.removeAttribute('manifest');
+        document.getElementById('activateBtn').disabled = true;
+      }
     }
+
+    // Tự động fetch (kéo) dữ liệu từ file firmware_list.json khi mở trang
+    fetch('firmware_list.json')
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        const select = document.getElementById('projectSelector');
+        select.innerHTML = ''; // Xóa chữ "Đang tải danh sách..."
+
+        if (data.length === 0) {
+          select.innerHTML = '<option value="">Chưa có dữ liệu firmware</option>';
+          return;
+        }
+
+        // Lặp qua mảng JSON và tạo giao diện menu động
+        data.forEach(group => {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = group.groupName;
+          
+          group.versions.forEach(version => {
+            const option = document.createElement('option');
+            option.value = version.path;
+            option.textContent = version.name;
+            optgroup.appendChild(option);
+          });
+          
+          select.appendChild(optgroup);
+        });
+
+        // Gán link cho phần tử đầu tiên mặc định
+        updateManifest();
+      })
+      .catch(error => {
+        console.error('Lỗi khi tải danh sách firmware:', error);
+        document.getElementById('projectSelector').innerHTML = '<option value="">Lỗi: Không tìm thấy firmware_list.json</option>';
+      });
   </script>
 
 </body>
