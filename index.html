@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAKISS - Trung Tâm Nạp Firmware</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f7f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 15px;
+    }
+    .box {
+      background: #ffffff;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      max-width: 440px;
+      width: 100%;
+    }
+    h2 { color: #d9534f; text-align: center; margin-top: 0; }
+    p.sub { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
+    label { font-weight: bold; font-size: 14px; display: block; margin-top: 12px; margin-bottom: 6px; }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .info-box {
+      background: #fdf2f2;
+      border-left: 4px solid #d9534f;
+      padding: 10px 14px;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #333;
+    }
+    .btn-container { text-align: center; margin-top: 20px; }
+    .flash-btn {
+      background: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>HAKISS Firmware Hub</h2>
+    <p class="sub">Chọn chương trình và phiên bản phù hợp để nạp cho ESP</p>
+
+    <!-- Menu chọn chương trình & phiên bản -->
+    <label for="fwSelect">Chọn chương trình nạp:</label>
+    <select id="fwSelect" onchange="changeFirmware()">
+      <optgroup label="Bên Truyền (ESP32-C3 Super Mini)">
+        <option value="./firmwares/hakiss-sender/v1.0.0/manifest.json">Mạch Truyền - v1.0.0 (Cơ bản)</option>
+        <option value="./firmwares/hakiss-sender/v1.1.0/manifest.json">Mạch Truyền - v1.1.0 (Tối ưu hóa)</option>
+      </optgroup>
+      <optgroup label="Bên Nhận (ESP32-S3 DevKit C1)">
+        <option value="./firmwares/hakiss-receiver/v1.0.0/manifest.json">Mạch Nhận - v1.0.0 (Chuẩn)</option>
+        <option value="./firmwares/hakiss-receiver/v2.0.0-json/manifest.json">Mạch Nhận - v2.0.0 (Gửi Email JSON)</option>
+      </optgroup>
+      <optgroup label="Dự án khác">
+        <option value="./firmwares/hakiss-farm/v1.0.0/manifest.json">Hakiss Smart Farm (ESP32-S3 N16R8)</option>
+      </optgroup>
+    </select>
+
+    <div class="info-box">
+      <b>Lưu ý:</b> Đảm bảo chọn đúng loại board (C3 hoặc S3) trước khi bấm nạp để tránh lỗi chip[cite: 2, 5].
+    </div>
+
+    <!-- Nút nạp -->
+    <div class="btn-container">
+      <esp-web-install-button id="flasherBtn" manifest="./firmwares/hakiss-sender/v1.0.0/manifest.json">
+        <button slot="activate" class="flash-btn">KẾT NỐI VÀ NẠP</button>
+        <span slot="unsupported">Trình duyệt không hỗ trợ Web Serial. Hãy dùng Chrome/Edge trên máy tính.</span>
+      </esp-web-install-button>
+    </div>
+  </div>
+
+  <script>
+    function changeFirmware() {
+      const select = document.getElementById('fwSelect');
+      const btn = document.getElementById('flasherBtn');
+      // Đổi đường dẫn manifest theo mục người dùng chọn
+      btn.setAttribute('manifest', select.value);
+    }
+  </script>
+
+</body>
+</html>
